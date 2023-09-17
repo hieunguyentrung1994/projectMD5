@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +22,7 @@ public class JwtResponse {
     private String email;
     private String phoneNumber;
     private boolean status;
-    private String avantar;
+    private MultipartFile uploadFile;
     private String address;
-
     private List<String> roles = new ArrayList<>();
 }

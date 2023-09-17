@@ -5,8 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.util.Date;
+import java.util.Set;
 
 @Entity
 @Data
@@ -31,12 +34,20 @@ public class OrderDetail {
     @Size(min=1,max=5)
     private double point;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @Column(name="date_order")
+    private Date orderDate;
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id")
     private Products product;
+
+
+    @ManyToOne
+    private RoleOrder roleOrder;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "User_id")
+    private Users user;
 }
 

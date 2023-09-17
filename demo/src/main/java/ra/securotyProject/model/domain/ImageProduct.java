@@ -6,19 +6,23 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Data
+@Table(name = "image_product")
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
 @Builder
-public class Catagory {
+public class ImageProduct {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name_catagory", length = 50)
-    private String nameCatagory;
+
+    private String image;
+
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Products product;
 
 }

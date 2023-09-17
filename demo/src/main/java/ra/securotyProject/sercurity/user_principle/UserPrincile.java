@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import ra.securotyProject.model.domain.Role;
 import ra.securotyProject.model.domain.Users;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +48,7 @@ public class UserPrincile implements UserDetails {
     private Set<Role> roles;
 
     private Collection<? extends GrantedAuthority> authorities;
+
 
 
     public static UserPrincile build(Users user){

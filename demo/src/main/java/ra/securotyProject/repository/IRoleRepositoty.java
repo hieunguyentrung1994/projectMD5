@@ -9,7 +9,5 @@ import java.util.Optional;
 @Repository
 public interface IRoleRepositoty extends JpaRepository<Role,Long> {
     // tìm kiếm  theo roleName
-
-
     Optional<Role> findByRoleName(RoleName roleName);
 }

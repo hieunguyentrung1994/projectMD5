@@ -1,15 +1,14 @@
 package ra.securotyProject.service.impl;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.MultipartFile;
 import ra.securotyProject.advice.ControllerAsvice;
-import ra.securotyProject.exception.UserException;
+import ra.securotyProject.exception.NotfoundException;
+import ra.securotyProject.exception.AlreadyExistException;
 import ra.securotyProject.model.domain.Role;
 import ra.securotyProject.model.domain.RoleName;
 import ra.securotyProject.model.domain.Users;
@@ -30,8 +29,6 @@ public class UserService implements IUserService {
     private IUserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
-    private ControllerAsvice controllerAsvice;
     @Autowired
     private JwtProvider jwtProvider;
 
@@ -58,10 +55,9 @@ public class UserService implements IUserService {
                 .username(userPrinciple.getUsername())
                 .email(userPrinciple.getEmail())
                 .phoneNumber(userPrinciple.getPhonenumber())
-                .avantar(userPrinciple.getAvantar())
+//                .uploadFile(userPrinciple.getAvantar())
                 .roles(roles)
                 .address(userPrinciple.getAddress())
-                .type("Bearer")
                 .status(userPrinciple.isStatus()).build();
     }
 
@@ -79,6 +75,28 @@ public class UserService implements IUserService {
         formSignUpDto.setDateLoading(new Date(timeInMillis));
         return formSignUpDto;
     }
+
+    @Override
+    public JwtResponse updateRole(Long id) throws NotfoundException, AlreadyExistException {
+          Optional<Users> users =  userRepository.findById(id);
+            Users user = users.get();
+          if (!users.isPresent()) {
+              throw new NotfoundException("Id này không tồn tại User tương ứng");
+          }
+        for (Role role : user.getRoles()) {
+              if(role.equals(roleService.findByRoleName(RoleName.ROLE_SELLER))){
+              throw new AlreadyExistException("User này đã có là người bán hàng");}
+          }
+          // lưu thêm mới role Seller
+         Set<Role> list = user.getRoles();
+          list.add(roleService.findByRoleName(RoleName.ROLE_SELLER));
+          user.setRoles(list);
+          userRepository.save(user);
+          // chuyển đổi user thành jwtResponse
+       UserPrincile userPrincile= UserPrincile.build(user);
+        return convertJwtResponse(userPrincile);
+    }
+
 
     @Override
     public Users save(FormSignUpDto form)  {
@@ -114,15 +132,53 @@ public class UserService implements IUserService {
 
 
     @Override
-    public boolean checkUser(FormSignUpDto form) throws UserException{
+    public boolean checkUser(FormSignUpDto form) throws AlreadyExistException {
         // kiểm tra tồn tại của Username,Email,PhoneNumber
         if (userRepository.existsByUserName(form.getUsername())){
-            throw new UserException("UserName này đã tồn tại");
+            throw new AlreadyExistException("UserName này đã tồn tại");
         }else if(userRepository.existsByEmail(form.getEmail())){
-            throw new UserException("Email này đã tồn tại");
+            throw new AlreadyExistException("Email này đã tồn tại");
         } else if (userRepository.existsByPhonenumber(form.getPhoneNumber())) {
-            throw new UserException("PhoneNumber này đã tồn tại");
+            throw new AlreadyExistException("PhoneNumber này đã tồn tại");
         }
         return true;
+    }
+
+
+    @Override
+    public String block_user(Long id) throws NotfoundException {
+            Optional<Users> users = userRepository.findById(id);
+            if (!users.isPresent()){
+                throw new NotfoundException("Không tìm thấy tài khoản !!!");
+            }
+            Users newUser = users.get();
+        for (Role role : newUser.getRoles()) {
+            if(role.equals(roleService.findByRoleName(RoleName.ROLE_ADMIN))){
+                throw new NotfoundException("Đây là tài khoản admin Bạn không thể blog ");
+             }}
+            if(newUser.isStatus() == false){
+                newUser.setStatus(true);
+                userRepository.save(newUser);
+                return "tài khoản "+ newUser.getUserName() + " đã được mở hoạt động !!!";
+            }else{
+                newUser.setStatus(false);
+                userRepository.save(newUser);
+                return "tài khoản "+ newUser.getUserName() + " đã Chặn hoạt động !!!";
+            }
+    }
+    @Autowired
+    private UploadService uploadService;
+    @Override
+    public Users updateAvantar(MultipartFile file,Long id) throws NotfoundException {
+        String url = uploadService.uploadFile(file);
+
+        Optional<Users> user = userRepository.findById(id);
+        if (!user.isPresent()) {
+            throw new NotfoundException("Không tìm thấy tài khoản !! ");
+        }
+        Users user1 = user.get();
+        user1.setAvantar(url);
+       return userRepository.save(user1);
+
     }
 }

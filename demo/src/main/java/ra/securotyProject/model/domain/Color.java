@@ -14,11 +14,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Catagory {
+public class Color {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name_catagory", length = 50)
-    private String nameCatagory;
+    @Column(name = "name_Color", length = 50)
+    private String nameColor;
+
 
 }

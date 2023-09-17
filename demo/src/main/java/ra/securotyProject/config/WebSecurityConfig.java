@@ -51,8 +51,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         // cáu hình phân qyền đường dẫn
         http.cors().and().csrf().disable() // tắt cáu hình csrf
                 .authorizeRequests()
+//                .antMatchers("/api/v4/test/all/**").permitAll()
                 .antMatchers("/api/v4/auth/**").permitAll()
-//                .antMatchers("/api/v4/test/**").hasRole("ADMIN") // cau hinh theo pattern
+                .antMatchers("/api/admin/**").hasRole("ADMIN")
+                .antMatchers("/api/sale/**").hasRole("SELLER")
+                .antMatchers("/api/user/**").hasRole("USER")
+//                .antMatchers("/api/v4/**").hasRole("USER") // cau hinh theo pattern
+
                 .anyRequest().authenticated() // các đường dân khác phả được xác thực
                 .and()
                 .exceptionHandling().authenticationEntryPoint(jwtEntryPoint)
